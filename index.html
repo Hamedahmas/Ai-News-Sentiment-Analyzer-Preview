@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>تحلیل حرفه‌ای اخبار اقتصادی</title>
+  <style>
+    body {
+      font-family: 'Vazir', Tahoma, sans-serif;
+      background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      margin: 0;
+      padding: 40px;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 20px;
+      color: #00e0ff;
+    }
+
+    .container {
+      background: #1c1c1e;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.2);
+      max-width: 900px;
+      margin: auto;
+    }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      padding: 15px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      resize: vertical;
+      background: #2c2c2e;
+      color: #fff;
+    }
+
+    button {
+      background: #00e0ff;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 12px;
+      margin-top: 15px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #00b3cc;
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      background: #111;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,255,255,0.1);
+    }
+
+    .currency-result {
+      background: #222;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border-left: 5px solid #00e0ff;
+    }
+
+    .positive { color: #00ff90; }
+    .negative { color: #ff4c4c; }
+    .neutral { color: #ccc; }
+
+    .score-bar {
+      height: 8px;
+      background: #555;
+      margin-top: 8px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      background: #00e0ff;
+    }
+  </style>
+</head>
+<body>
+  <h2>تحلیل هوشمند اخبار اقتصادی و ارزی</h2>
+
+  <div class="container">
+    <p>متن خبر را وارد کنید:</p>
+    <textarea id="newsInput" placeholder="اینجا خبر را وارد کنید..."></textarea>
+    <button onclick="analyzeNews()">تحلیل کن</button>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.5.1/dist/transformers.min.js"></script>
+  <script>
+    async function analyzeNews() {
+      const text = document.getElementById("newsInput").value;
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "در حال تحلیل با هوش مصنوعی...";
+
+      // Load FinBERT from HuggingFace (via Xenova)
+      const pipeline = await window.transformers.pipeline("sentiment-analysis", "Xenova/finbert-tone");
+      const output = await pipeline(text);
+
+      let label = output[0].label;
+      let score = Math.round(output[0].score * 100);
+      let sentimentClass = 'neutral';
+      if (label === "positive") sentimentClass = 'positive';
+      else if (label === "negative") sentimentClass = 'negative';
+
+      let html = `<p><strong>نتیجه تحلیل با FinBERT:</strong></p>`;
+      html += `<div class="currency-result">
+        <p><span class="${sentimentClass}"><strong>${label.toUpperCase()}</strong></span> با اعتماد به نفس ${score}%</p>
+        <div class="score-bar"><div class="score-fill" style="width: ${score}%;"></div></div>
+      </div>`;
+
+      resultDiv.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
